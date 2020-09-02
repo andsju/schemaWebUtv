@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+
+    <script>
+        let events = {
+            w34: "Introduktion<br>Kom igång med teknik",
+            w35: "Föreläsning HTML 1",
+            w36: "Föreläsning HTML 2<br>Matematik introduktion",
+            w37: "Föreläsning HTML 4<br>Inlämningsuppgift 1 (Om HTML)",
+            w38: "Föreläsning CSS 1",
+            w39: "Föreläsning CSS 2<br>Inlämningsuppgift 1 lämnas in",
+            w40: "Föreläsning CSS 3",
+            w41: "Föreläsning CSS 4<br>Inlämningsuppgift 2 (Om CSS)",
+        }
+
+        let e = JSON.stringify(events);
+        console.log(e);
+
+
+        //let json = '{ "w36": "HTML 1", "w37": "HTML 2", "w38": "HTML 3", "w39": "HTML 4"}';
+
+
+        // This script is released to the public domain and may be used, modified and
+        // distributed without restrictions. Attribution not necessary but appreciated.
+        // Source: https://weeknumber.net/how-to/javascript
+
+        Date.prototype.getWeek = function () {
+            var date = new Date(this.getTime());
+            date.setHours(0, 0, 0, 0);
+            // Thursday in current week decides the year.
+            date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+            // January 4 is always in week 1.
+            var week1 = new Date(date.getFullYear(), 0, 4);
+            // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+            return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 -
+                3 + (week1.getDay() + 6) % 7) / 7);
+        }
+
+
+
+        class Calendar {
+            constructor(date) {
+                this.date = date;
+                this.monthNames = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "September", "Oktober", "November", "December"];
+            }
+
+            log = function () {
+                console.log(this.date);
+            }
+
+            showWeekNumbers = function (n) {
+                console.log("showWeekNumbers")
+                let newDt = this.date;
+
+
+                for (var i = 0; i < n; i++) {
+                    console.log(newDt.getWeek());
+                    newDt.setDate(newDt.getDate() + 7);
+                }
+            }
+
+            showWeekEvents = function (numberOfWeeks) {
+                console.log("showWeekEvents");
+                let d = this.date;
+                let event = "";
+
+                let cachedMonth = "";
+                let displayMonth = false;
+                let currentMonth = "";
+
+                let html = "";
+
+                for (var i = 0; i < numberOfWeeks; i++) {
+                    let w = d.getWeek();
+                    //let month = d.getMonth();
+                    
+                    if (cachedMonth == "") {
+                        cachedMonth = d.getMonth();
+                        displayMonth = true;
+                        currentMonth = cachedMonth;
+                    } else {
+                        if (currentMonth != d.getMonth()) {
+                            displayMonth = true;
+                            currentMonth = d.getMonth();
+                        }
+                    }
+                    if (displayMonth) {
+                        console.log(this.monthNames[d.getMonth()-1]);
+                        html += this.wrapElementContent("h2", this.monthNames[d.getMonth()-1]);
+                        displayMonth = false;
+                    }
+
+
+
+
+                    //console.log(w, this);
+                    let ev = this.getEvent(w);
+                    let monday = this.getMonday(d);
+                    let mondayFriendly = this.formatDate(monday);
+                    //console.log(w, monday, mondayFriendly, "ev", ev);
+                    let d1 = d.setDate(d.getDate());
+                    d.setDate(d.getDate() + 7);
+                    let weekSpan = this.formatDates(d1, d);
+                    //console.log(this.formatDates(d1, d));
+                    console.log(w, weekSpan, ev);
+
+
+                    html += this.wrapElementContent("p", "v" + w + " (" + weekSpan + ")");
+                    html += this.wrapElementContent("dd", ev);
+
+                }
+
+                return html;
+            }
+
+            getEvent = function (w) {
+                //console.log("GetEvent...");
+                //console.log(json, typeof json)
+                let objEvents = JSON.parse(e)
+
+                //console.log("objEvents", objEvents);
+                let event = "";
+                Object.keys(objEvents).forEach(function (key) {
+                    let week = "w" + w;
+                    //console.log(w, key, week, week == key);
+
+                    if (week == key) {
+                        event = objEvents[key];
+                    }
+                })
+
+                return event;
+
+            }
+
+
+            getMonday = function (d) {
+                d = new Date(d);
+                var day = d.getDay(),
+                    diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+                return new Date(d.setDate(diff));
+            }
+
+
+            formatDate = function (date) {
+                var d = new Date(date),
+                    month = '' + (d.getMonth() + 1),
+                    day = '' + d.getDate(),
+                    year = d.getFullYear();
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                return [year, month, day].join('-');
+            }
+
+
+
+            formatDates = function (date1, date2) {
+                var d1 = new Date(date1);
+                var month1 = '' + (d1.getMonth() + 1);
+                var day1 = '' + d1.getDate();
+                var year1 = d1.getFullYear();
+                var d2 = new Date(date2);
+                var month2 = '' + (d2.getMonth() + 1);
+                var day2 = '' + d2.getDate();
+                var year2 = d2.getFullYear();
+
+                let string = "";
+
+                if (month1 == month2) {
+                    return day1 + "-" + day2 + "/" + month1;
+                } else if (year1 != year2) {
+                    return day1 + "/" + month1 + " " + year1 + " - " + day2 + "/" + month2 + " " + year2;
+                } else {
+                    return day1 + "/" + month1 + " - " + day2 + "/" + month2;
+                }
+
+            }
+
+            wrapElementContent(element, content) {
+                //let el = document.createElement(element);
+                //let text = document.createTextNode(content);
+                //el.appendChild(text);
+                let html = "<" + element + ">" + content + "</" + element + ">";
+                return html;
+            }
+
+
+        }
+
+        let dt = new Date();
+
+
+
+        let d1 = new Calendar(dt);
+        console.log("dt1", dt);
+        console.log("dt2", dt);
+        d1.log();
+        console.log("dt3", dt);
+        dt = new Date();
+        d1.showWeekNumbers(2);
+        console.log("dt4", dt);
+
+        //let s = d1.getEvent(36, json);
+        //console.log("s", s, d1);
+        let dt2 = new Date(2020,6,10);
+        let d2 = new Calendar(dt2);
+        console.log("dt", dt);
+        d2.log();
+        let html = d2.showWeekEvents(20);
+
+        document.body.innerHTML = html;
+
+    </script>
+
+
+</body>
+
+</html>
